@@ -16,5 +16,5 @@ if __name__ == '__main__':
             message = create_message_with_metadata(file_path, metadata)
             produce(message)
 
-        time.sleep(0.5)
+        time.sleep(5)
         i += 1
