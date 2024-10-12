@@ -42,6 +42,9 @@ def process_and_upload_image_to_s3(encoded_image, filename):
 
     image = Image.open(io.BytesIO(image_bytes))
 
+    # rotate image 90 deg right
+    image = image.rotate(angle=90)
+
     # save image locally
     file_path = PIC_FOLDER_CONSUMER / filename
     image.save(file_path)
