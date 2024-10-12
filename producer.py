@@ -3,7 +3,7 @@ import json
 
 from utils import encodeb64
 
-producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers='192.168.0.27:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 
 def produce(message):

@@ -18,8 +18,41 @@ services:
     image: apache/kafka:3.8.0
     container_name: kafka
     ports:
-      - "9092:9092"
+      - "9092:9092"  # For external client communication (PLAINTEXT_EXTERNAL)
+      - "9093:9093"  # For internal broker communication (PLAINTEXT_INTERNAL)
+      - "9094:9094"  # For controller communication (CONTROLLER)
+    environment:
+      KAFKA_NODE_ID: 1  # Unique ID for the Kafka node
+      KAFKA_PROCESS_ROLES: broker,controller  # Kafka running as both broker and controller
+
+      # Listeners: Each listener has a unique port for different roles
+      KAFKA_LISTENERS: PLAINTEXT_EXTERNAL://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:9093,CONTROLLER://0.0.0.0:9094
+
+      # Advertise the external and internal listeners, use localhost for internal communication
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_EXTERNAL://192.168.0.27:9092,PLAINTEXT_INTERNAL://localhost:9093
+
+      # Define the controller quorum voters
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@192.168.0.27:9094  # Controller voter with node ID and controller port
+
+      # Map security protocols to listeners
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_EXTERNAL:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      # Specify the listener for inter-broker communication and controller
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER  # The controller must have its own listener
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_METADATA_LOG_DIRS: /var/lib/kafka/meta  # Metadata storage for KRaft mode
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - kafka_meta:/var/lib/kafka/meta
 
 volumes:
   minio_data:
+    driver: local
+  kafka_data:
+    driver: local
+  kafka_meta:
     driver: local
